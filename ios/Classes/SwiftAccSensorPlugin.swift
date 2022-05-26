@@ -40,7 +40,7 @@ class SwiftStreamHandler: NSObject, FlutterStreamHandler {
         let manager = CMMotionManager.init()
         let GRAVITY = 9.8;
 
-        manager.startAccelerometerUpdates(to: OperationQueue.current!) { (data, error) in
+        manager.startAccelerometerUpdates(to: OperationQueue.init()) { (data, error) in
                 if let myData = data{
                     if(self.isEnabled){
                         events(
@@ -53,11 +53,6 @@ class SwiftStreamHandler: NSObject, FlutterStreamHandler {
                     }
                 }
         }
-//        events(true) // any generic type or more compex dictionary of [String:Any]
-//        events(FlutterError(code: "ERROR_CODE",
-//                             message: "Detailed message",
-//                             details: nil)) // in case of errors
-//        events(FlutterEndOfEventStream) // when stream is over
         return nil
     }
 
