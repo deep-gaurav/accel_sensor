@@ -20,22 +20,23 @@ class AccSensorPlugin: FlutterPlugin, MethodCallHandler {
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel : MethodChannel
   private lateinit var senseroImpl: SensorImpl
+  private lateinit var accelerometerChannel: EventChannel
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "acc_sensor")
+    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "com.example.acc_sensor/acc_sensor")
     val sensorsManager = flutterPluginBinding.applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     senseroImpl = SensorImpl(
             sensorsManager,
             Sensor.TYPE_ACCELEROMETER
     )
 
-    val accelerometerChannel = EventChannel(flutterPluginBinding.binaryMessenger, "acc_messenger")
-    val accelerationStreamHandler = senseroImpl
-    accelerometerChannel.setStreamHandler(accelerationStreamHandler)
+    accelerometerChannel = EventChannel(flutterPluginBinding.binaryMessenger, "com.example.acc_sensor/acc_messenger")
+    accelerometerChannel.setStreamHandler( senseroImpl )
     channel.setMethodCallHandler(this)
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+    print(call.method)
     if (call.method == "enable") {
       senseroImpl.isEnabled = true
       result.success(null)

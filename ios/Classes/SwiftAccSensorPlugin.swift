@@ -11,9 +11,9 @@ public class SwiftAccSensorPlugin: NSObject, FlutterPlugin {
     }
     
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "acc_sensor", binaryMessenger: registrar.messenger())
-      let handler = SwiftStreamHandler();
-      let evc = FlutterEventChannel(name: "acc_messenger", binaryMessenger: registrar.messenger());
+    let channel = FlutterMethodChannel(name: "com.example.acc_sensor/acc_sensor", binaryMessenger: registrar.messenger())
+      let handler = SwiftStreamHandler(mmanager:CMMotionManager.init());
+      let evc = FlutterEventChannel(name: "com.example.acc_sensor/acc_messenger", binaryMessenger: registrar.messenger());
       evc.setStreamHandler(handler)
       let instance = SwiftAccSensorPlugin(sth:handler)
     registrar.addMethodCallDelegate(instance, channel: channel)
@@ -36,11 +36,26 @@ public class SwiftAccSensorPlugin: NSObject, FlutterPlugin {
 
 class SwiftStreamHandler: NSObject, FlutterStreamHandler {
     public var isEnabled = true;
+    public var motionManager:CMMotionManager;
+    
+    public init(mmanager:CMMotionManager) {
+        motionManager = mmanager
+    }
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        let manager = CMMotionManager.init()
         let GRAVITY = 9.8;
-
-        manager.startAccelerometerUpdates(to: OperationQueue.init()) { (data, error) in
+//        if #available(iOS 10.0, *) {
+//            let timer = Timer(timeInterval: 0.4, repeats: true) { _ in
+//                if (self.isEnabled){
+//                    events([-1,-1,-1])
+//                }else{
+//                    
+//                }
+//             }
+//            RunLoop.current.add(timer, forMode: RunLoop.Mode.common)
+//        } else {
+//            // Fallback on earlier versions
+//        }
+        motionManager.startAccelerometerUpdates(to: OperationQueue.current!) { (data, error) in
                 if let myData = data{
                     if(self.isEnabled){
                         events(
@@ -57,6 +72,7 @@ class SwiftStreamHandler: NSObject, FlutterStreamHandler {
     }
 
     public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        motionManager.stopDeviceMotionUpdates()
         return nil
     }
 }

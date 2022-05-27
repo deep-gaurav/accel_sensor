@@ -3,10 +3,15 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 class AccSensor {
-  static const MethodChannel _channel = MethodChannel('acc_sensor');
-  static const EventChannel _eventChannel = EventChannel('acc_messenger');
+  final MethodChannel _channel =
+      const MethodChannel('com.example.acc_sensor/acc_sensor');
+  final EventChannel _eventChannel =
+      const EventChannel('com.example.acc_sensor/acc_messenger');
   Stream<AccelerometerEvent>? _accelerometerEvents;
 
+  AccSensor() {
+    _eventChannel.receiveBroadcastStream();
+  }
   start() {
     _channel.invokeMethod('enable');
   }
@@ -16,14 +21,19 @@ class AccSensor {
   }
 
   /// A broadcast stream of events from the device accelerometer.
-  @override
   Stream<AccelerometerEvent> get accelerometerEvents {
-    _accelerometerEvents ??=
-        _eventChannel.receiveBroadcastStream().map((dynamic event) {
-      final list = event.cast<double>();
-      return AccelerometerEvent(list[0]!, list[1]!, list[2]!);
-    });
-    return _accelerometerEvents!;
+    try {
+      start();
+      _accelerometerEvents ??=
+          _eventChannel.receiveBroadcastStream("start").map((dynamic event) {
+        final list = event.cast<num>();
+        return AccelerometerEvent(
+            list[0]?.toDouble()!, list[1]?.toDouble()!, list[2]?.toDouble()!);
+      });
+      return _accelerometerEvents!;
+    } catch (e) {
+      throw e;
+    }
   }
 }
 

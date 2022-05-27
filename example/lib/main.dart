@@ -26,14 +26,18 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
       // platformVersion =
       //     await AccSensor.platformVersion ?? 'Unknown platform version';
+      AccSensor().accelerometerEvents.listen((event) {
+        setState(() {
+          _platformVersion = "x: ${event.x}, y: ${event.y}, z: ${event.z}";
+        });
+      });
     } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
+      _platformVersion = 'Failed to get platform version.';
     }
 
     // If the widget was removed from the tree while the asynchronous platform
